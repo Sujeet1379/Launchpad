@@ -174,7 +174,7 @@ class CourseHomeFragmentView(EdxFragmentView):
             # Redirect the user to the dashboard if they are not enrolled and
             # this is a course that does not support direct enrollment.
             if not can_self_enroll_in_course(course_key):
-                raise CourseAccessRedirect(reverse('dashboard'))
+                raise CourseAccessRedirect(reverse('courses'))
 
         # Get the course tools enabled for this user and course
         course_tools = CourseToolsPluginManager.get_enabled_course_tools(request, course_key)

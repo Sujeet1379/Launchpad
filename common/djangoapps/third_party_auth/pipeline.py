@@ -1039,5 +1039,5 @@ def ensure_redirect_url_is_safe(strategy, *args, **kwargs):
         )
 
         if not is_safe:
-            safe_redirect_url = getattr(settings, 'SOCIAL_AUTH_LOGIN_REDIRECT_URL', '/dashboard')
+            safe_redirect_url = getattr(settings, 'SOCIAL_AUTH_LOGIN_REDIRECT_URL', '/courses')
             strategy.session_set(REDIRECT_FIELD_NAME, safe_redirect_url)

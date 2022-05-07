@@ -13,7 +13,8 @@ from .views import (
     EnrollmentListView,
     EnrollmentUserRolesView,
     EnrollmentView,
-    UnenrollmentView
+    UnenrollmentView,
+    CoursLiveClassesApiListView,
 )
 
 urlpatterns = [
@@ -29,4 +30,8 @@ urlpatterns = [
             EnrollmentCourseDetailView.as_view(), name='courseenrollmentdetails'),
     path('unenroll/', UnenrollmentView.as_view(), name='unenrollment'),
     path('roles/', EnrollmentUserRolesView.as_view(), name='roles'),
+
+    re_path(r'^enrollment/{course_id}/live_class'.format(
+            course_id=settings.COURSE_ID_PATTERN),
+            CoursLiveClassesApiListView.as_view(), name='course_live_class'),
 ]

@@ -25,6 +25,7 @@ from rest_framework.throttling import UserRateThrottle  # lint-amnesty, pylint: 
 from rest_framework.views import APIView  # lint-amnesty, pylint: disable=wrong-import-order
 
 from common.djangoapps.course_modes.models import CourseMode
+from openedx.core.djangoapps.content.course_overviews.models import CourseLiveClasses
 from common.djangoapps.student.auth import user_has_role
 from common.djangoapps.student.models import CourseEnrollment, User
 from common.djangoapps.student.roles import CourseStaffRole, GlobalStaff
@@ -41,7 +42,7 @@ from openedx.core.djangoapps.enrollments.errors import (
 )
 from openedx.core.djangoapps.enrollments.forms import CourseEnrollmentsApiListForm
 from openedx.core.djangoapps.enrollments.paginators import CourseEnrollmentsApiListPagination
-from openedx.core.djangoapps.enrollments.serializers import CourseEnrollmentsApiListSerializer
+from openedx.core.djangoapps.enrollments.serializers import CourseEnrollmentsApiListSerializer ,CourseLiveClassesSerializer
 from openedx.core.djangoapps.user_api.accounts.permissions import CanRetireUser
 from openedx.core.djangoapps.user_api.models import UserRetirementStatus
 from openedx.core.djangoapps.user_api.preferences.api import update_email_opt_in
@@ -974,3 +975,20 @@ class CourseEnrollmentsApiListView(DeveloperErrorViewMixin, ListAPIView):
         if usernames:
             queryset = queryset.filter(user__username__in=usernames)
         return queryset
+
+
+class CoursLiveClassesApiListView(DeveloperErrorViewMixin, ListAPIView):
+    authentication_classes = (
+        JwtAuthentication,
+        BearerAuthenticationAllowInactiveUser,
+        SessionAuthenticationAllowInactiveUser,
+    )
+    permission_classes = (permissions.IsAdminUser,)
+    throttle_classes = (EnrollmentUserThrottle,)
+    serializer_class = CourseLiveClassesSerializer
+    #pagination_class = CourseLiveClassesSerializer
+
+    def get_queryset(self):
+        course_id = self.kwargs.get('course_id')
+
+        return CourseLiveClasses.objects.filter(course=course_id)

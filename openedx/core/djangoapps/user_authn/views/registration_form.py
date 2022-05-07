@@ -172,6 +172,8 @@ class AccountCreationForm(forms.Form):
         validators=[validate_name]
     )
 
+    country = forms.CharField(required=False)
+
     def __init__(
         self,
         data=None,
@@ -202,7 +204,7 @@ class AccountCreationForm(forms.Form):
         for field_name, field_value in extra_fields.items():
             if field_name not in self.fields:
                 if field_name == "honor_code":
-                    if field_value == "required":
+                    if field_value == "hidden":
                         self.fields[field_name] = TrueField(
                             error_messages={
                                 "required": _("To enroll, you must follow the honor code.")
@@ -928,7 +930,7 @@ class RegistrationFormFactory:
             required=required
         )
 
-    def _add_country_field(self, form_desc, required=True):
+    def _add_country_field(self, form_desc, required="hidden"):
         """Add a country field to a form description.
         Arguments:
             form_desc: A form description
@@ -958,18 +960,18 @@ class RegistrationFormFactory:
 
         form_desc.add_field(
             "country",
-            label=country_label,
+            #label=country_label,
             instructions=country_instructions,
             field_type="select",
             options=list(countries),
-            include_default_option=True,
-            required=required,
+            include_default_option=False,
+            required="hidden",
             error_messages={
                 "required": error_msg
             }
         )
 
-    def _add_honor_code_field(self, form_desc, required=True):
+    def _add_honor_code_field(self, form_desc, required=False):
         """Add an honor code field to a form description.
         Arguments:
             form_desc: A form description
@@ -1035,7 +1037,7 @@ class RegistrationFormFactory:
 
         form_desc.add_field(
             "honor_code",
-            label=label,
+            #label=label,
             field_type=field_type,
             default=False,
             required=required,

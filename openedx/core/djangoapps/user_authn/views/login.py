@@ -497,6 +497,7 @@ def enterprise_selection_page(request, user, next_url):
     method='POST',
 )  # lint-amnesty, pylint: disable=too-many-statements
 def login_user(request, api_version='v1'):
+    # import pdb;pdb.set_trace()
     """
     AJAX request to log in the user.
 
@@ -592,21 +593,27 @@ def login_user(request, api_version='v1'):
 
         # The AJAX method calling should know the default destination upon success
         redirect_url, finish_auth_url = None, ''
+        logging.info("____login1_____" , redirect_url , finish_auth_url )
 
         if third_party_auth_requested:
             running_pipeline = pipeline.get(request)
             finish_auth_url = pipeline.get_complete_url(backend_name=running_pipeline['backend'])
+            logging.info("____login2_____" , running_pipeline , finish_auth_url )
 
         if is_user_third_party_authenticated:
             redirect_url = finish_auth_url
+            logging.info("____login3_____" , redirect_url , finish_auth_url )
         elif should_redirect_to_authn_microfrontend():
             next_url, root_url = get_next_url_for_login_page(request, include_host=True)
             redirect_url = get_redirect_url_with_host(
                 root_url,
                 enterprise_selection_page(request, possibly_authenticated_user, finish_auth_url or next_url)
             )
+            logging.info("____login4_____" , redirect_url , root_url , next_url)
 
+        #logging.info("____login5_____" , response )
         response = JsonResponse({
+            
             'success': True,
             'redirect_url': redirect_url,
         })
@@ -680,6 +687,7 @@ class LoginSessionView(APIView):
     #@method_decorator(csrf_protect)
     @csrf_exempt
     def post(self, request, api_version):
+        
         """Log in a user.
 
         See `login_user` for details.

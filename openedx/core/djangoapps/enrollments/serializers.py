@@ -139,7 +139,7 @@ class CourseEnrollmentsApiListSerializer(CourseEnrollmentSerializer):
         self.fields.pop('course_details')
 
     class Meta(CourseEnrollmentSerializer.Meta):
-        fields = CourseEnrollmentSerializer.Meta.fields + ('course_id', )
+        fields = CourseEnrollmentSerializer.Meta.fields + ('course_id',)
 
 
 class ModeSerializer(serializers.Serializer):  # pylint: disable=abstract-method
