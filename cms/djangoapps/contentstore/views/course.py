@@ -12,6 +12,16 @@ import string
 from collections import defaultdict
 from typing import Dict
 
+
+
+
+
+
+from django.contrib.auth.models import User 
+from opaque_keys import InvalidKeyError 
+
+
+
 import django.utils
 from ccx_keys.locator import CCXLocator
 from django.conf import settings
@@ -559,10 +569,14 @@ def course_listing(request):
         'archived_courses': archived_courses,
         'in_process_course_actions': in_process_course_actions,
         'libraries_enabled': LIBRARIES_ENABLED,
+        'liveclass_enabled': True,
+        'liveclass_enabled_list': False,
         'redirect_to_library_authoring_mfe': should_redirect_to_library_authoring_mfe(),
         'library_authoring_mfe_url': LIBRARY_AUTHORING_MICROFRONTEND_URL,
+        'liveclass_authoring_mfe_url': '#',
         'libraries': [_format_library_for_view(lib, request) for lib in libraries],
         'show_new_library_button': user_can_create_library(user) and not should_redirect_to_library_authoring_mfe(),
+        'show_new_liveclass_button': user_can_create_library(user) and not should_redirect_to_library_authoring_mfe(),
         'user': user,
         'request_course_creator_url': reverse('request_course_creator'),
         'course_creator_status': _get_course_creator_status(user),
@@ -589,6 +603,7 @@ def library_listing(request):
         'show_new_library_button': LIBRARIES_ENABLED and request.user.is_active,
         'user': request.user,
         'request_course_creator_url': reverse('request_course_creator'),
+        'show_new_liveclass_button': LIBRARIES_ENABLED and request.user.is_active,
         'course_creator_status': _get_course_creator_status(request.user),
         'allow_unicode_course_id': settings.FEATURES.get('ALLOW_UNICODE_COURSE_ID', False),
         'archived_courses': True,
@@ -1607,6 +1622,8 @@ def textbooks_list_handler(request, course_key_string):
             store.update_item(course, request.user.id)
             return JsonResponse(course.pdf_textbooks)
         elif request.method == 'POST':
+
+            # import pdb;pdb.set_trace()
             # create a new textbook for the course
             try:
                 textbook = validate_textbook_json(request.body)
@@ -1907,3 +1924,6 @@ def _get_course_creator_status(user):
         course_creator_status = 'granted'
 
     return course_creator_status
+
+
+

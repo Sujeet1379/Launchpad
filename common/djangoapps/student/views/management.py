@@ -161,6 +161,7 @@ def index(request, extra_context=None, user=AnonymousUser()):
 
     # allow for theme override of the courses list
     context['courses_list'] = theming_helpers.get_template_path('courses_list.html')
+    log.info("_____course_list_____" , context   ,context['courses_list'] )
 
     # Insert additional context for use in the template
     context.update(extra_context)

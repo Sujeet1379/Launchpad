@@ -86,7 +86,7 @@ from lms.djangoapps.courseware.models import (
 )
 from lms.djangoapps.courseware.toggles import streak_celebration_is_active
 from lms.djangoapps.verify_student.models import SoftwareSecurePhotoVerification
-from openedx.core.djangoapps.content.course_overviews.models import CourseOverview , CourseLiveClasses
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverview , LiveClasses
 from openedx.core.djangoapps.enrollments.api import (
     _default_course_mode,
     get_enrollment_attributes,
@@ -1239,6 +1239,16 @@ class CourseEnrollmentManager(models.Manager):
 CourseEnrollmentState = namedtuple('CourseEnrollmentState', 'mode, is_active')
 
 
+
+
+class LiveClassEnrollment(models.Model):
+
+    live_class = models.ForeignKey(LiveClasses, null=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+
+
+
 class CourseEnrollment(models.Model):
     """
     Represents a Student's Enrollment record for a single Course. You should
@@ -1273,7 +1283,6 @@ class CourseEnrollment(models.Model):
     # in the course (is_enrolled() will return False)
     is_active = models.BooleanField(default=True)
 
-    course_live_class = models.ForeignKey(CourseLiveClasses, null=True, on_delete=models.CASCADE)
 
     # Represents the modes that are possible. We'll update this later with a
     # list of possible values.

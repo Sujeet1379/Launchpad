@@ -916,6 +916,8 @@ def course_about(request, course_id):
     """
     Display the course's about page.
     """
+
+    #import pdb;pdb.set_trace()
     course_key = CourseKey.from_string(course_id)
 
     # If a user is not able to enroll in a course then redirect

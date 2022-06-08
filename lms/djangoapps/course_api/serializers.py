@@ -96,23 +96,23 @@ class CourseSerializer(serializers.Serializer):  # pylint: disable=abstract-meth
     """
 
     blocks_url = serializers.SerializerMethodField()
-    effort = serializers.CharField()
+    # effort = serializers.CharField()
     end = serializers.DateTimeField()
-    enrollment_start = serializers.DateTimeField()
-    enrollment_end = serializers.DateTimeField()
+    # enrollment_start = serializers.DateTimeField()
+    # enrollment_end = serializers.DateTimeField()
     id = serializers.CharField()  # pylint: disable=invalid-name
-    media = _CourseApiMediaCollectionSerializer(source='*')
+    # media = _CourseApiMediaCollectionSerializer(source='*')
     name = serializers.CharField(source='display_name_with_default_escaped')
     number = serializers.CharField(source='display_number_with_default')
     org = serializers.CharField(source='display_org_with_default')
-    short_description = serializers.CharField()
+    # short_description = serializers.CharField()
     start = serializers.DateTimeField()
     start_display = serializers.CharField()
     start_type = serializers.CharField()
-    pacing = serializers.CharField()
-    mobile_available = serializers.BooleanField()
-    hidden = serializers.SerializerMethodField()
-    invitation_only = serializers.BooleanField()
+    # pacing = serializers.CharField()
+    # mobile_available = serializers.BooleanField()
+    # hidden = serializers.SerializerMethodField()
+    # invitation_only = serializers.BooleanField()
 
     # 'course_id' is a deprecated field, please use 'id' instead.
     course_id = serializers.CharField(source='id', read_only=True)

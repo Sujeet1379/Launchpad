@@ -2,6 +2,7 @@
 Common utilities for the course experience, including course outline.
 """
 
+import logging
 from django.utils import timezone
 from opaque_keys.edx.keys import CourseKey
 
@@ -13,6 +14,7 @@ from openedx.features.course_experience import RELATIVE_DATES_FLAG
 from common.djangoapps.student.models import CourseEnrollment
 from xmodule.modulestore.django import modulestore  # lint-amnesty, pylint: disable=wrong-import-order
 
+log = logging.getLogger(__name__)
 
 @request_cached()
 def get_course_outline_block_tree(request, course_id, user=None, allow_start_dates_in_future=False):  # lint-amnesty, pylint: disable=too-many-statements
@@ -23,7 +25,7 @@ def get_course_outline_block_tree(request, course_id, user=None, allow_start_dat
             returned that can bypass the StartDateTransformer's filter to show
             blocks with start dates in the future.
     """
-
+    # import pdb;pdb.set_trace()
     assert user is None or user.is_authenticated
 
     def populate_children(block, all_blocks):
@@ -37,11 +39,13 @@ def get_course_outline_block_tree(request, course_id, user=None, allow_start_dat
         """
         children = block.get('children', [])
 
+        # children = children[2:-1]
+
         for i in range(len(children)):
             child_id = block['children'][i]
             child_detail = populate_children(all_blocks[child_id], all_blocks)
             block['children'][i] = child_detail
-
+            # log.info("___block_____" , block ,children)
         return block
 
     def recurse_mark_scored(block):

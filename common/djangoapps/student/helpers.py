@@ -301,7 +301,7 @@ def get_next_url_for_login_page(request, include_host=False):
             # If redirect url isn't set, reverse to dashboard
             if not redirect_to:
                 # Tries reversing the LMS dashboard if the url doesn't exist
-                #redirect_to = reverse('dashboard')
+                redirect_to = reverse('dashboard')
                 logging.info("____helper3_____" ,redirect_to  )
                 
                 redirect_to = reverse('courses')
@@ -364,7 +364,7 @@ def _get_redirect_to(request_host, request_headers, request_params, request_is_h
     """
     
     if settings.ROOT_URLCONF == 'lms.urls':
-        redirect_to = request_params.get('courses')
+        redirect_to = request_params.get('next')
         header_accept = request_headers.get('HTTP_ACCEPT', '')
         accepts_text_html = any(
             mime_type in header_accept

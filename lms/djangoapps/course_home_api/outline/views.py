@@ -164,6 +164,8 @@ class OutlineTabView(RetrieveAPIView):
     serializer_class = OutlineTabSerializer
 
     def get(self, request, *args, **kwargs):  # pylint: disable=too-many-statements
+
+        # import pdb;pdb.set_trace()
         course_key_string = kwargs.get('course_key_string')
         course_key = CourseKey.from_string(course_key_string)
         course_usage_key = modulestore().make_course_usage_key(course_key)  # pylint: disable=unused-variable
@@ -174,7 +176,7 @@ class OutlineTabView(RetrieveAPIView):
         # Enable NR tracing for this view based on course
         monitoring_utils.set_custom_attribute('course_id', course_key_string)
         monitoring_utils.set_custom_attribute('user_id', request.user.id)
-        monitoring_utils.set_custom_attribute('is_staff', request.user.is_staff)
+        monitoring_utils.set_custom_attribute('is_active', request.user.is_active)
 
         course = get_course_with_access(request.user, 'load', course_key, check_if_enrolled=False)
 
@@ -230,10 +232,10 @@ class OutlineTabView(RetrieveAPIView):
         welcome_message_html = None
 
         is_enrolled = enrollment and enrollment.is_active
-        is_staff = bool(has_access(request.user, 'staff', course_key))
-        show_enrolled = is_enrolled or is_staff
+        is_active = bool(has_access(request.user, 'staff', course_key))
+        show_enrolled = is_enrolled or is_active
         enable_proctored_exams = False
-        if show_enrolled:
+        if is_enrolled:
             course_blocks = get_course_outline_block_tree(request, course_key_string, request.user)
             date_blocks = get_course_date_blocks(course, request.user, request, num_assignments=1)
             dates_widget['course_date_blocks'] = [block for block in date_blocks if not isinstance(block, TodaysDate)]
@@ -268,12 +270,40 @@ class OutlineTabView(RetrieveAPIView):
                 start_block = get_start_block(course_blocks)
                 resume_course['url'] = start_block['lms_web_url']
 
-        elif allow_public_outline or allow_public or user_is_masquerading:
-            course_blocks = get_course_outline_block_tree(request, course_key_string, None)
-            if allow_public or user_is_masquerading:
-                handouts_html = get_course_info_section(request, request.user, course, 'handouts')
 
-        if not is_enrolled:
+
+
+
+        elif is_active:
+            course_blocks = get_course_outline_block_tree(request, course_key_string, request.user)
+            if course_blocks:
+                user_course_outline = get_user_course_outline(
+                    course_key, request.user, datetime.now(tz=timezone.utc)
+                )
+                available_seq_ids = {str(usage_key) for usage_key in user_course_outline.sequences}
+
+                # course_blocks is a reference to the root of the course, so we go
+                # through the chapters (sections) to look for sequences to remove.
+                for chapter_data in course_blocks['children']:
+                    chapter_data['children'] = [
+                        seq_data
+                        for seq_data in chapter_data['children']
+                        if (
+                            seq_data['id'] in available_seq_ids or
+                            # Edge case: Sometimes we have weird course structures.
+                            # We expect only sequentials here, but if there is
+                            # another type, just skip it (don't filter it out).
+                            seq_data['type'] != 'sequential'
+                        )
+                    ]
+                    chapter_data = None
+                    return chapter_data
+
+                
+            
+
+
+        else:
             if CourseMode.is_masters_only(course_key):
                 enroll_alert['can_enroll'] = False
                 enroll_alert['extra_text'] = _(
@@ -283,6 +313,9 @@ class OutlineTabView(RetrieveAPIView):
             elif course_is_invitation_only(course):
                 enroll_alert['can_enroll'] = False
 
+
+
+
         # Sometimes there are sequences returned by Course Blocks that we
         # don't actually want to show to the user, such as when a sequence is
         # composed entirely of units that the user can't access. The Learning
@@ -291,26 +324,28 @@ class OutlineTabView(RetrieveAPIView):
         #
         # The long term goal is to remove the Course Blocks API call entirely,
         # so this is a tiny first step in that migration.
-        if course_blocks:
-            user_course_outline = get_user_course_outline(
-                course_key, request.user, datetime.now(tz=timezone.utc)
-            )
-            available_seq_ids = {str(usage_key) for usage_key in user_course_outline.sequences}
+        # if course_blocks:
+        #     user_course_outline = get_user_course_outline(
+        #         course_key, request.user, datetime.now(tz=timezone.utc)
+        #     )
+        #     available_seq_ids = {str(usage_key) for usage_key in user_course_outline.sequences}
 
-            # course_blocks is a reference to the root of the course, so we go
-            # through the chapters (sections) to look for sequences to remove.
-            for chapter_data in course_blocks['children']:
-                chapter_data['children'] = [
-                    seq_data
-                    for seq_data in chapter_data['children']
-                    if (
-                        seq_data['id'] in available_seq_ids or
-                        # Edge case: Sometimes we have weird course structures.
-                        # We expect only sequentials here, but if there is
-                        # another type, just skip it (don't filter it out).
-                        seq_data['type'] != 'sequential'
-                    )
-                ] if 'children' in chapter_data else []
+        #     # course_blocks is a reference to the root of the course, so we go
+        #     # through the chapters (sections) to look for sequences to remove.
+        #     for chapter_data in course_blocks['children']:
+        #         chapter_data['children'] = [
+        #             seq_data
+        #             for seq_data in chapter_data['children']
+        #             if (
+        #                 seq_data['id'] in available_seq_ids or
+        #                 # Edge case: Sometimes we have weird course structures.
+        #                 # We expect only sequentials here, but if there is
+        #                 # another type, just skip it (don't filter it out).
+        #                 seq_data['type'] != 'sequential'
+        #             )
+        #         ] if 'children' in chapter_data else []
+
+
 
         user_has_passing_grade = False
         if not request.user.is_anonymous:

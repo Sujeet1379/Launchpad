@@ -45,7 +45,7 @@ from enterprise.constants import (
     ENTERPRISE_OPERATOR_ROLE
 )
 
-from openedx.core.constants import COURSE_KEY_REGEX, COURSE_KEY_PATTERN, COURSE_ID_PATTERN
+from openedx.core.constants import COURSE_KEY_REGEX, COURSE_KEY_PATTERN, COURSE_ID_PATTERN ,LIVE_CLASS_ID_PATTERN
 from openedx.core.djangoapps.theming.helpers_dirs import (
     get_themes_unchecked,
     get_theme_base_dirs_from_settings
@@ -1605,7 +1605,12 @@ DATABASES = {
         'PASSWORD': 'password',
         'PORT': '3306',
         'USER': 'edxapp001'
-    }
+    },
+
+    'default': {
+        'ENGINE': 'djongo',
+        'NAME': 'edx',
+    },
 }
 
 
@@ -3229,7 +3234,7 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
     ),
     'EXCEPTION_HANDLER': 'openedx.core.lib.request_utils.expected_error_exception_handler',
-    'PAGE_SIZE': 10,
+    'PAGE_SIZE': 20,
     'URL_FORMAT_OVERRIDE': None,
     'DEFAULT_THROTTLE_RATES': {
         'user': '60/minute',
@@ -4396,7 +4401,7 @@ DEFAULT_SITE_THEME = None
 #   defined by DEFAULT_SITE_THEME.
 # .. toggle_use_cases: open_edx
 # .. toggle_creation_date: 2016-06-30
-ENABLE_COMPREHENSIVE_THEMING = False
+ENABLE_COMPREHENSIVE_THEMING = True
 
 # API access management
 API_ACCESS_MANAGER_EMAIL = 'api-access@example.com'

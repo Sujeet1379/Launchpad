@@ -593,7 +593,7 @@ def login_user(request, api_version='v1'):
 
         # The AJAX method calling should know the default destination upon success
         redirect_url, finish_auth_url = None, ''
-        logging.info("____login1_____" , redirect_url , finish_auth_url )
+        #logging.info("____login1_____" , redirect_url , finish_auth_url )
 
         if third_party_auth_requested:
             running_pipeline = pipeline.get(request)

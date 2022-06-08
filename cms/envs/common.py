@@ -722,7 +722,7 @@ ELASTIC_SEARCH_CONFIG = [
 # These are standard regexes for pulling out info like course_ids, usage_ids, etc.
 # They are used so that URLs with deprecated-format strings still work.
 from lms.envs.common import (
-    COURSE_KEY_PATTERN, COURSE_KEY_REGEX, COURSE_ID_PATTERN, USAGE_KEY_PATTERN, ASSET_KEY_PATTERN
+    COURSE_KEY_PATTERN, COURSE_KEY_REGEX, COURSE_ID_PATTERN, USAGE_KEY_PATTERN, ASSET_KEY_PATTERN ,LIVE_CLASS_ID_PATTERN
 )
 
 ######################### CSRF #########################################
@@ -990,7 +990,12 @@ DATABASES = {
         'PASSWORD': 'password',
         'PORT': '3306',
         'USER': 'edxapp001'
-    }
+    },
+
+    'default': {
+        'ENGINE': 'djongo',
+        'NAME': 'edx',
+    },
 }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
@@ -2054,7 +2059,7 @@ DEFAULT_SITE_THEME = None
 # .. toggle_description: See LMS annotation.
 # .. toggle_use_cases: open_edx
 # .. toggle_creation_date: 2016-06-30
-ENABLE_COMPREHENSIVE_THEMING = False
+ENABLE_COMPREHENSIVE_THEMING = True
 
 ############################ Global Database Configuration #####################
 
