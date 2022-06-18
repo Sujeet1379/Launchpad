@@ -2,6 +2,7 @@
 Outline Tab Views
 """
 from datetime import datetime, timezone
+import logging
 
 from completion.exceptions import UnavailableCompletionData  # lint-amnesty, pylint: disable=wrong-import-order
 from completion.utilities import get_key_to_last_completed_block  # lint-amnesty, pylint: disable=wrong-import-order
@@ -56,7 +57,7 @@ from openedx.features.discounts.utils import generate_offer_data
 from xmodule.course_module import COURSE_VISIBILITY_PUBLIC, COURSE_VISIBILITY_PUBLIC_OUTLINE  # lint-amnesty, pylint: disable=wrong-import-order
 from xmodule.modulestore.django import modulestore  # lint-amnesty, pylint: disable=wrong-import-order
 
-
+log = logging.getLogger(__name__)
 class UnableToDismissWelcomeMessage(APIException):
     status_code = 400
     default_detail = 'Unable to dismiss welcome message.'
@@ -163,7 +164,7 @@ class OutlineTabView(RetrieveAPIView):
 
     serializer_class = OutlineTabSerializer
 
-    def get(self, request, *args, **kwargs):  # pylint: disable=too-many-statements
+    def get(self, request, *args, **kwargs ):  # pylint: disable=too-many-statements
 
         # import pdb;pdb.set_trace()
         course_key_string = kwargs.get('course_key_string')
@@ -176,7 +177,7 @@ class OutlineTabView(RetrieveAPIView):
         # Enable NR tracing for this view based on course
         monitoring_utils.set_custom_attribute('course_id', course_key_string)
         monitoring_utils.set_custom_attribute('user_id', request.user.id)
-        monitoring_utils.set_custom_attribute('is_active', request.user.is_active)
+        monitoring_utils.set_custom_attribute('is_staff', request.user.is_staff)
 
         course = get_course_with_access(request.user, 'load', course_key, check_if_enrolled=False)
 
@@ -232,8 +233,9 @@ class OutlineTabView(RetrieveAPIView):
         welcome_message_html = None
 
         is_enrolled = enrollment and enrollment.is_active
-        is_active = bool(has_access(request.user, 'staff', course_key))
-        show_enrolled = is_enrolled or is_active
+        is_staff = bool(has_access(request.user, 'staff', course_key))
+        
+        show_enrolled = is_enrolled or is_staff
         enable_proctored_exams = False
         if is_enrolled:
             course_blocks = get_course_outline_block_tree(request, course_key_string, request.user)
@@ -272,38 +274,26 @@ class OutlineTabView(RetrieveAPIView):
 
 
 
-
-
-        elif is_active:
+        elif not is_enrolled:
             course_blocks = get_course_outline_block_tree(request, course_key_string, request.user)
-            if course_blocks:
-                user_course_outline = get_user_course_outline(
-                    course_key, request.user, datetime.now(tz=timezone.utc)
-                )
-                available_seq_ids = {str(usage_key) for usage_key in user_course_outline.sequences}
 
-                # course_blocks is a reference to the root of the course, so we go
-                # through the chapters (sections) to look for sequences to remove.
-                for chapter_data in course_blocks['children']:
-                    chapter_data['children'] = [
-                        seq_data
-                        for seq_data in chapter_data['children']
-                        if (
-                            seq_data['id'] in available_seq_ids or
-                            # Edge case: Sometimes we have weird course structures.
-                            # We expect only sequentials here, but if there is
-                            # another type, just skip it (don't filter it out).
-                            seq_data['type'] != 'sequential'
-                        )
-                    ]
-                    chapter_data = None
-                    return chapter_data
-
-                
+            # course_blocks['children']=course_blocks['children'][0:2] 
             
+            children_list=course_blocks.get('children')
+            if children_list and len(children_list)>=2:
+    
+                for children in children_list[2:]:
+                    if children.get('children'):
+                        children.pop('children')
+            course_blocks['children'] = children_list
+
+            # return Response (course_blocks)
+
+              
 
 
         else:
+
             if CourseMode.is_masters_only(course_key):
                 enroll_alert['can_enroll'] = False
                 enroll_alert['extra_text'] = _(
@@ -312,6 +302,10 @@ class OutlineTabView(RetrieveAPIView):
                 ).format(platform_name=settings.PLATFORM_NAME)
             elif course_is_invitation_only(course):
                 enroll_alert['can_enroll'] = False
+
+        @property
+        def is_locked(self):
+            pass  
 
 
 

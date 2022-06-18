@@ -29,6 +29,7 @@ def get_course_outline_block_tree(request, course_id, user=None, allow_start_dat
     assert user is None or user.is_authenticated
 
     def populate_children(block, all_blocks):
+        # import pdb;pdb.set_trace()
         """
         Replace each child id with the full block for the child.
 

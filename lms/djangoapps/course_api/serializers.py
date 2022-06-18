@@ -95,7 +95,7 @@ class CourseSerializer(serializers.Serializer):  # pylint: disable=abstract-meth
     Compare this with CourseDetailSerializer.
     """
 
-    blocks_url = serializers.SerializerMethodField()
+    # blocks_url = serializers.SerializerMethodField()
     # effort = serializers.CharField()
     end = serializers.DateTimeField()
     # enrollment_start = serializers.DateTimeField()
@@ -125,15 +125,15 @@ class CourseSerializer(serializers.Serializer):  # pylint: disable=abstract-meth
         catalog_visibility = course_overview.catalog_visibility
         return catalog_visibility in ['about', 'none'] or course_overview.id.deprecated  # Old Mongo should be hidden
 
-    def get_blocks_url(self, course_overview):
-        """
-        Get the representation for SerializerMethodField `blocks_url`
-        """
-        base_url = '?'.join([
-            reverse('blocks_in_course'),
-            urllib.parse.urlencode({'course_id': course_overview.id}),
-        ])
-        return self.context['request'].build_absolute_uri(base_url)
+    # def get_blocks_url(self, course_overview):
+    #     """
+    #     Get the representation for SerializerMethodField `blocks_url`
+    #     """
+    #     base_url = '?'.join([
+    #         reverse('blocks_in_course'),
+    #         urllib.parse.urlencode({'course_id': course_overview.id}),
+    #     ])
+    #     return self.context['request'].build_absolute_uri(base_url)
 
 
 class CourseDetailSerializer(CourseSerializer):  # pylint: disable=abstract-method
