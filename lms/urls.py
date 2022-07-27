@@ -53,7 +53,10 @@ from openedx.core.djangoapps.verified_track_content import views as verified_tra
 from openedx.features.enterprise_support.api import enterprise_enabled
 from common.djangoapps.student import views as student_views
 from common.djangoapps.util import views as util_views
-from common.djangoapps.student.views.management import uploaded_doc_view
+from common.djangoapps.student.views.management import uploaded_doc_view, AnnouncementView ,StaffDetailsListApiView ,StaffofCourseDetailslist ,CourseandStafAassignedDetailsList
+from lms.djangoapps.course_api.views import ProgressView
+from openedx.features.course_experience.views.course_home import outline_tab
+
 
 RESET_COURSE_DEADLINES_NAME = 'reset_course_deadlines'
 RENDER_XBLOCK_NAME = 'render_xblock'
@@ -114,6 +117,9 @@ urlpatterns = [
 
     path('i18n/', include('django.conf.urls.i18n')),
 
+
+
+
     # Enrollment API RESTful endpoints
     path('api/enrollment/v1/', include('openedx.core.djangoapps.enrollments.urls')),
 
@@ -168,6 +174,21 @@ urlpatterns = [
 
 
     path("get_doc/", uploaded_doc_view, name='uploaded_doc_view'),
+    path('student/announcement/', AnnouncementView.as_view(), name="announcement"),
+    path('start_progress/', ProgressView.as_view(), name="progress-start"),
+    path('update_progress/<int:progress_id>/', ProgressView.as_view(), name='progress_update'),
+    path('get_progress/<str:bases>/', ProgressView.as_view(), name="get_progress"),
+
+    path('get/staff/list/details' , StaffDetailsListApiView.as_view(), name="get_staff_list_details"),
+
+    path('get/enroll/course/staff/details/<course_id>' , StaffofCourseDetailslist.as_view(), name="get_course_staff_list_details"),
+
+    path('get/all/staff/details/of/all/course' , CourseandStafAassignedDetailsList.as_view(), name="get_all_staff_details_of_all_course"),
+
+
+
+
+
 
     # Update session view
     path('lang_pref/session_language', lang_pref_views.update_session_language, name='session_language'),
@@ -361,6 +382,15 @@ urlpatterns += [
         courseware_views.course_about,
         name='about_course',
     ),
+
+    re_path(
+        r'^courses/{}/home$'.format(
+            settings.COURSE_ID_PATTERN,
+        ),
+        outline_tab,
+        name='home',
+    ),
+
     path(
         'courses/yt_video_metadata',
         courseware_views.yt_video_metadata,
